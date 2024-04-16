@@ -7,7 +7,7 @@ describe("Token", () => {
 
     beforeEach(async () => {
         const Token = await ethers.getContractFactory("Token");
-        token = await Token.deploy();
+        token = await Token.deploy("JUST Token", "JUST", 1000000);
     })
 
 
@@ -24,6 +24,7 @@ describe("Token", () => {
     });
 
     it("Should return the right totalSupply", async () => {
-        expect(await token.totalSupply()).to.equal('1000000000000000000000000');
+        const value = ethers.utils.parseUnits('1000000', 18);
+        expect(await token.totalSupply()).to.equal(value);
     });
 });
