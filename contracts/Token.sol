@@ -16,4 +16,9 @@ contract Token {
         totalSupply = _totalSupply * 10 ** decimals;
         balanceOf[msg.sender] = totalSupply;
     }
+
+    function transfer(address _to, uint256 _value) public returns (bool success){
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+    }
 }
