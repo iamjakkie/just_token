@@ -40,18 +40,27 @@ describe("Token", () => {
     })
 
     describe('Transfer', () => {
-        let amount;
+        let amount, transaction, result;
 
         it('Transfers token balances', async () => {
-            console.log("deployer balance before transfer", ethers.utils.formatEther(await token.balanceOf(deployer.address)));
-            console.log("receiver balance before transfer", ethers.utils.formatEther(await token.balanceOf(receiver.address)));
-
             amount = ethers.utils.parseUnits('100', 18);
-            let transaction = await token.connect(deployer).transfer(receiver.address, amount);
-            let result = transaction.wait();
+            transaction = await token.connect(deployer).transfer(receiver.address, amount);
+            result = transaction.wait();
 
-            console.log("deployer balance before transfer", ethers.utils.formatEther(await token.balanceOf(deployer.address)));
-            console.log("receiver balance before transfer", ethers.utils.formatEther(await token.balanceOf(receiver.address)));
+            expect(await token.balanceOf(deployer.address)).to.equal(totalSupply.sub(amount));
+            expect(await token.balanceOf(receiver.address)).to.equal(amount);
+        })
+
+        it('Emits Transfer event', async () => {
+            amount = ethers.utils.parseUnits('100', 18);
+            transaction = await token.connect(deployer).transfer(receiver.address, amount);
+            result = transaction.wait();
+            expect(result).to.emit(token, 'Transfer').withArgs(deployer.address, receiver.address, amount);
+        })
+
+        it('Throws error if insufficient balance', async () => {
+            amount = ethers.utils.parseUnits('1000001', 18);
+            await expect(token.connect(deployer).transfer(receiver.address, amount)).to.be.revertedWith('Insufficient balance');
         })
     })
 });
