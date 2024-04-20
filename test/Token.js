@@ -86,4 +86,25 @@ describe("Token", () => {
             await expect(token.connect(deployer).approve('0x0000000000000000000000000000000000000000', amount)).to.be.revertedWith('Invalid address');
         })
     })
+
+    describe('Delegated Token Transfers', () => {
+        let amount, transaction, result;
+
+        beforeEach(async () => {
+            amount = ethers.utils.parseUnits('100', 18);
+            transaction = await token.connect(deployer).approve(exchange.address, amount);
+            result = await transaction.wait();
+        })
+
+        it('TransferFrom token balances', async () => {
+            await token.connect(exchange).transferFrom(deployer.address, receiver.address, amount);
+            expect(await token.balanceOf(deployer.address)).to.equal(totalSupply.sub(amount));
+            expect(await token.balanceOf(receiver.address)).to.equal(amount);
+        })
+
+        it('Rejects insufficient allowance', async () => {
+            amount = ethers.utils.parseUnits('101', 18);
+            await expect(token.connect(exchange).transferFrom(deployer.address, receiver.address, amount)).to.be.revertedWith('Insufficient allowance');
+        })
+    })
 });
