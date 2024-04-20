@@ -22,19 +22,19 @@ describe("Token", () => {
         it("Should return the right name", async () => {
             expect(await token.name()).to.equal(name);
         });
-    
+
         it("Should return the right symbol", async () => {
             expect(await token.symbol()).to.equal(symbol);
         });
-    
+
         it("Should return the right decimals", async () => {
             expect(await token.decimals()).to.equal(decimals);
         });
-    
+
         it("Should return the right totalSupply", async () => {
             expect(await token.totalSupply()).to.equal(totalSupply);
         });
-    
+
         it("assigns total supply to deployer", async () => {
             expect(await token.balanceOf(deployer.address)).to.equal(totalSupply);
         })
@@ -67,7 +67,7 @@ describe("Token", () => {
 
     describe('Approve', () => {
         let amount, transaction, result;
-        
+
         beforeEach(async () => {
             amount = ethers.utils.parseUnits('100', 18);
             transaction = await token.connect(deployer).approve(exchange.address, amount);
