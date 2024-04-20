@@ -7,7 +7,7 @@ describe("Token", () => {
     const decimals = 18;
     const totalSupply = ethers.utils.parseUnits('1000000', 18);
 
-    let token, deployer, receiver;
+    let token, deployer, receiver, exchange;
 
     beforeEach(async () => {
         const Token = await ethers.getContractFactory("Token");
@@ -15,6 +15,7 @@ describe("Token", () => {
         let accounts = await ethers.getSigners();
         deployer = accounts[0];
         receiver = accounts[1];
+        exchange = accounts[2];
     })
 
     describe("Deployment", () => {
@@ -61,6 +62,28 @@ describe("Token", () => {
         it('Throws error if insufficient balance', async () => {
             amount = ethers.utils.parseUnits('1000001', 18);
             await expect(token.connect(deployer).transfer(receiver.address, amount)).to.be.revertedWith('Insufficient balance');
+        })
+    })
+
+    describe('Approve', () => {
+        let amount, transaction, result;
+        
+        beforeEach(async () => {
+            amount = ethers.utils.parseUnits('100', 18);
+            transaction = await token.connect(deployer).approve(exchange.address, amount);
+            result = await transaction.wait();
+        })
+
+        it('Allocates an allowance for delegated token spending', async () => {
+            expect(await token.allowance(deployer.address, exchange.address)).to.equal(amount);
+        })
+
+        it('Emits Approval event', async () => {
+            expect(result).to.emit(token, 'Approval').withArgs(deployer.address, exchange.address, amount);
+        })
+
+        it('Rejects invalid spenders', async () => {
+            await expect(token.connect(deployer).approve('0x0000000000000000000000000000000000000000', amount)).to.be.revertedWith('Invalid address');
         })
     })
 });
